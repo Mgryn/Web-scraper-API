@@ -1,0 +1,36 @@
+version: "3.7"
+
+services:
+  web:
+    build: .
+    depends_on:
+      - redis
+      - mongodb
+    ports:
+      - "5000:5000"
+
+  worker:
+    build: .
+    entrypoint: celery
+    command: -A app.celery worker --loglevel=info
+    depends_on:
+      - redis
+    
+  redis:
+    image: redis
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    command: mongod
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_DATABASE: flaskdb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
